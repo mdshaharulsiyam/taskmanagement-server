@@ -10,7 +10,7 @@ const stripe = require("stripe")(process.env.SRTIPE_KEY)
 // middleware
 app.use(express.json())
 app.use(cors({
-  origin: ['http://localhost:5173'],
+  origin: ['http://localhost:5173','https://cozy-puppy-8c013b.netlify.app'],
   credentials: true,
   optionSuccessStatus: 200
 }));
@@ -128,6 +128,20 @@ async function run() {
       const result = await task.find(query).sort({ priority: -1 }).toArray()
       res.send(result)
     })
+    app.get('/notification', verifyToken, async (req, res) => {
+      const { useremail} = req.query;
+      if (useremail !== req.user.useremail) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+      const currentDate = new Date();
+      const query = {
+        useremail: useremail,
+        status: { $ne: 'completed' },
+        deadline: { $eq: currentDate.toISOString().split('T')[0] }
+      };      
+      const result = await task.find(query).sort({ priority: -1 }).toArray()
+      res.send(result)
+    })
     app.get('/alltask', verifyToken, async (req, res) => {
       const { useremail } = req.query;
       if (useremail !== req.user.useremail) {
@@ -141,15 +155,15 @@ async function run() {
       const result = await task.find(query).sort({ deadline: -1 }).toArray()
       res.send(result)
     })
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
 
   }
 }
 run().catch(console.dir);
 app.get('/', async (req, res) => {
-  res.send('FrankStore Server is running')
+  res.send('YourTask Server is running')
 })
 app.listen(port, () => {
   console.log(`server is runing on port ${port}`)
