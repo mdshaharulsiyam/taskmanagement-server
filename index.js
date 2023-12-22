@@ -79,6 +79,12 @@ async function run() {
       const result = await users.findOne(query)
       res.send(result)
     })
+    app.get('/sinngletask', async (req, res) => {
+      const { id } = req.query;
+      const query = { _id: new ObjectId(id) }
+      const result = await task.findOne(query)
+      res.send(result)
+    })
     app.post('/task', verifyToken, async (req, res) => {
       const data = req.body;
       const result = await task.insertOne(data)
@@ -96,7 +102,7 @@ async function run() {
           ...data
         }
       }
-      const result = await task.updateOne(filter,query)
+      const result = await task.updateOne(filter, query)
       res.send(result)
     })
     app.delete('/task', verifyToken, async (req, res) => {
@@ -104,12 +110,12 @@ async function run() {
       if (useremail !== req.user.useremail) {
         return res.status(403).send({ message: 'forbidden access' })
       }
-  
-      const result = await task.deleteOne({_id : new ObjectId(id)})
+
+      const result = await task.deleteOne({ _id: new ObjectId(id) })
       res.send(result)
     })
     app.get('/task', verifyToken, async (req, res) => {
-      const { useremail,status } = req.query;
+      const { useremail, status } = req.query;
       if (useremail !== req.user.useremail) {
         return res.status(403).send({ message: 'forbidden access' })
       }
