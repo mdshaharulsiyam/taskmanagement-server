@@ -119,7 +119,20 @@ async function run() {
         status: status,
         deadline: { $gte: currentDate.toISOString().split('T')[0] }
       };
-      const result = await task.find(query).sort({ priority: 1 }).toArray()
+      const result = await task.find(query).sort({ priority: -1 }).toArray()
+      res.send(result)
+    })
+    app.get('/alltask', verifyToken, async (req, res) => {
+      const { useremail } = req.query;
+      if (useremail !== req.user.useremail) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+      const currentDate = new Date();
+      const query = {
+        useremail: useremail,
+        deadline: { $lt: currentDate.toISOString().split('T')[0] }
+      };
+      const result = await task.find(query).sort({ deadline: -1 }).toArray()
       res.send(result)
     })
     await client.db("admin").command({ ping: 1 });
